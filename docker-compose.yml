@@ -1,0 +1,50 @@
+services:
+    app:
+        build:
+            context: ./docker/php
+            dockerfile: Dockerfile
+        container_name: GBancariaApp
+        working_dir: /var/www
+        volumes:
+            - ./:/var/www
+            - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+            - ./docker/php/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+        ports:
+            - "5173:5173" # Porta do Vite
+            - "9003:9003" # Porta do Xdebug
+        networks:
+            - gbancaria_network
+
+    webserver:
+        image: nginx:alpine
+        container_name: GBancariaWebserver
+        restart: unless-stopped
+        ports:
+            - "9696:80"
+        volumes:
+            - ./:/var/www
+            - ./docker/nginx/conf.d:/etc/nginx/conf.d
+        networks:
+            - gbancaria_network
+
+    db:
+        image: mysql:5.7
+        container_name: GBancariaDB
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: laravel
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_PASSWORD: root
+            MYSQL_USER: laravel
+        ports:
+            - "3306:3306"
+        volumes:
+            - dbdata:/var/lib/mysql
+        networks:
+            - gbancaria_network
+
+networks:
+    gbancaria_network:
+
+volumes:
+    dbdata:
