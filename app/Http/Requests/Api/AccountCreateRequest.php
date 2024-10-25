@@ -33,5 +33,8 @@ class AccountCreateRequest extends FormRequest
             'uuid' => (string) $this->numero_conta,
             'balance' => $this->saldo,
         ]);
+
+        $this->getInputSource()->remove('numero_conta');
+        $this->getInputSource()->remove('saldo');
     }
 }
