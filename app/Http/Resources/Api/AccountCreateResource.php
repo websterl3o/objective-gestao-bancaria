@@ -15,10 +15,10 @@ class AccountCreateResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'uuid' => $this->uuid,
-            'balance' => $this->balance,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'numero_conta' => $this->uuid,
+            'saldo' => $this->balance,
+            'data_criacao' => $this->created_at,
+            'data_atualizacao' => $this->updated_at,
         ];
     }
 }

@@ -26,4 +26,12 @@ class AccountCreateRequest extends FormRequest
             'balance' => 'required|numeric',
         ];
     }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'uuid' => (string) $this->numero_conta,
+            'balance' => $this->saldo,
+        ]);
+    }
 }

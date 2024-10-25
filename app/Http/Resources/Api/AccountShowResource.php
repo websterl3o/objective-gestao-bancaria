@@ -15,9 +15,9 @@ class AccountShowResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'uuid' => $this->uuid,
-            'balance' => $this->balance,
-            'updated_at' => $this->updated_at,
+            'numero_conta' => $this->uuid,
+            'saldo' => $this->balance,
+            'data_atualizacao' => $this->updated_at,
         ];
     }
 }
