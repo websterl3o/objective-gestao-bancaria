@@ -20,7 +20,7 @@ services:
         container_name: GBancariaWebserver
         restart: unless-stopped
         ports:
-            - "9696:80"
+            - "9695:80"
         volumes:
             - ./:/var/www
             - ./docker/nginx/conf.d:/etc/nginx/conf.d
@@ -32,16 +32,30 @@ services:
         container_name: GBancariaDB
         restart: unless-stopped
         environment:
-            MYSQL_DATABASE: laravel
+            MYSQL_DATABASE: gestao_bancaria
             MYSQL_ROOT_PASSWORD: root
             MYSQL_PASSWORD: root
-            MYSQL_USER: laravel
+            MYSQL_USER: gestao_bancaria
         ports:
             - "3306:3306"
         volumes:
             - dbdata:/var/lib/mysql
         networks:
             - gbancaria_network
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: GBancariaPMAdmin
+        restart: unless-stopped
+        environment:
+            PMA_HOST: db
+            PMA_USER: gestao_bancaria
+            PMA_PASSWORD: root
+            MYSQL_ROOT_PASSWORD: root
+        ports:
+        - "8888:80"
+        networks:
+        - gbancaria_network
 
 networks:
     gbancaria_network:

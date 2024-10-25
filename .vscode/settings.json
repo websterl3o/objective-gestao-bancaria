@@ -7,10 +7,10 @@
             },
             "previewLimit": 50,
             "server": "localhost",
-            "port": 3306,
+            "port": 3307,
             "driver": "MySQL",
-            "name": "DB-local-windows",
-            "database": "laravel",
+            "name": "local-windows",
+            "database": "gestao_bancaria",
             "username": "laravel",
             "password": "root"
         }
