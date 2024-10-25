@@ -17,7 +17,6 @@ class AccountShowResource extends JsonResource
         return [
             'numero_conta' => $this->uuid,
             'saldo' => $this->balance,
-            'data_atualizacao' => $this->updated_at,
         ];
     }
 }

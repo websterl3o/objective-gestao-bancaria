@@ -25,7 +25,7 @@ class AccountController extends Controller
             return new AccountShowResource($account);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Account not found.',
+                'message' => 'Conta não encontrada.',
             ], 404);
         }
     }
@@ -38,7 +38,7 @@ class AccountController extends Controller
             return new AccountShowResource($account);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Account not found.',
+                'message' => 'Conta não encontrada.',
             ], 404);
         }
     }
