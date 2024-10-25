@@ -37,4 +37,13 @@ class AccountCreateRequest extends FormRequest
         $this->getInputSource()->remove('numero_conta');
         $this->getInputSource()->remove('saldo');
     }
+
+    public function messages(): array
+    {
+        return [
+            'uuid.required' => 'O campo número da conta é obrigatório.',
+            'balance.required' => 'O campo saldo é obrigatório.',
+            'balance.numeric' => 'O campo saldo deve ser um número.',
+        ];
+    }
 }
