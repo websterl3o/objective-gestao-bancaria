@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Account;
 use App\Models\Transaction;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Exceptions\InsufficientBalance;
 use App\Http\Requests\Api\TransactionCreateRequest;
@@ -12,7 +13,6 @@ class CreateTransaction
 {
     protected Account $account;
     protected TransactionCreateRequest $request;
-    protected array $data;
 
     public function __construct(Account $account, TransactionCreateRequest $request)
     {
@@ -22,26 +22,25 @@ class CreateTransaction
 
     public function handle(): Transaction
     {
-        $this->fillData();
+        DB::beginTransaction();
 
-        if ($this->account->canAddTransaction($this->request->value, $this->request->type_payment)) {
-            Log::error("Erro na tentativa de criar transação na conta {$this->account->uuid}, por motivo de saldo insuficiente.", [$this->account->toArray(), $this->data]);
+        $transaction = Transaction::prepareTransaction(
+            $this->account->uuid,
+            $this->request->type,
+            $this->request->type_payment,
+            $this->request->value
+        );
+
+        if ($this->account->canAddTransaction($transaction->total)) {
+            Log::error("Erro na tentativa de criar transação na conta {$this->account->uuid}, por motivo de saldo insuficiente.", [$this->account->toArray(), $transaction->toArray()]);
             throw new InsufficientBalance("Erro na tentativa de criar transação na conta {$this->account->uuid}, por motivo de saldo insuficiente.");
         }
 
-        $fee = Transaction::OPERATION_FEE[$this->request->type_payment];
-
-        $this->data['fee'] = Transaction::operationFee($fee, $this->data['value']);
-        $this->data['total'] = $this->data['value'] + $this->data['fee'];
-
-        $transaction = Transaction::create($this->data);
+        $transaction->save();
         $transaction->updateBalance();
 
-        return $transaction;
-    }
+        DB::commit();
 
-    protected function fillData(): void
-    {
-        $this->data = $this->request->all();
+        return $transaction;
     }
 }

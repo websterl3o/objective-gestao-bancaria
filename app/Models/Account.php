@@ -2,10 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\Log;
+use App\Exceptions\InsufficientBalance;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Account extends Model
 {
+    use HasFactory;
+
     protected $table = 'accounts';
 
     protected $fillable = [
@@ -22,14 +27,18 @@ class Account extends Model
         return $this->hasMany(Transaction::class, 'account_uuid', 'uuid');
     }
 
-    public function debit($balance)
+    public function debit($value)
     {
-        $this->balance -= $balance;
+        if (($this->balance - $value) <= 0) {
+            throw new InsufficientBalance("Erro na tentativa de criar transação na conta {$this->uuid}, por motivo de saldo insuficiente.");
+        }
+
+        $this->balance -= $value;
         $this->save();
     }
 
-    public function canAddTransaction($value, $type_payment): bool
+    public function canAddTransaction($value): bool
     {
-        return $this->balance < ($value + $this->operationFee(Transaction::OPERATION_FEE[$type_payment], $value));
+        return $this->balance >= $value;
     }
 }
