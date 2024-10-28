@@ -31,8 +31,7 @@ class CreateTransaction
             $this->request->value
         );
 
-        if ($this->account->canAddTransaction($transaction->total)) {
-            Log::error("Erro na tentativa de criar transação na conta {$this->account->uuid}, por motivo de saldo insuficiente.", [$this->account->toArray(), $transaction->toArray()]);
+        if (! $this->account->canAddTransaction($transaction->total)) {
             throw new InsufficientBalance("Erro na tentativa de criar transação na conta {$this->account->uuid}, por motivo de saldo insuficiente.");
         }
 

@@ -29,7 +29,7 @@ class Account extends Model
 
     public function debit($value)
     {
-        if (($this->balance - $value) <= 0) {
+        if (($this->balance - $value) < 0) {
             throw new InsufficientBalance("Erro na tentativa de criar transação na conta {$this->uuid}, por motivo de saldo insuficiente.");
         }
 

@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Account;
-use Illuminate\Support\Facades\Log;
 use App\Exceptions\InsufficientBalance;
 
 test('it_returns_true_when_account_has_sufficient_balance_for_transaction', function () {
