@@ -4,9 +4,53 @@ use App\Models\Account;
 use App\Models\Transaction;
 use App\Services\CreateTransaction;
 use App\Exceptions\InsufficientBalance;
-use App\Http\Requests\Api\TransactionCreateRequest;
 
-test('it_creates_transaction_successfully_when_account_has_sufficient_balance', function () {
+test('it_creates_transaction_successfully_when_account_has_sufficient_balance_with_type_payment_P', function () {
+    $account = Account::factory()->create([
+        'balance' => 1000,
+    ]);
+
+    $requestData = [
+        'uuid' => $account->uuid,
+        'type' => 'debit',
+        'type_payment' => 'P',
+        'value' => 100.0,
+    ];
+
+    $transaction = Transaction::prepareTransaction(
+        $account->uuid,
+        $requestData['type'],
+        $requestData['type_payment'],
+        $requestData['value']
+    );
+
+    $createTransaction = new CreateTransaction($account, $transaction);
+
+    $fee = Transaction::operationFee(
+    Transaction::getFee($requestData['type_payment']),
+        $requestData['value']
+    );
+
+    $total = $requestData['value'] + $fee;
+
+    $transaction = $createTransaction->handle();
+
+    $this->assertDatabaseHas('transactions', [
+        'account_uuid' => $account->uuid,
+        'type' => $requestData['type'],
+        'type_payment' => $requestData['type_payment'],
+        'value' => $requestData['value'],
+        'fee' => $fee,
+        'total' => $total,
+    ]);
+
+    $this->assertDatabaseHas('accounts', [
+        'uuid' => $account->uuid,
+        'balance' => $account->balance - $requestData['value'] - $fee,
+    ]);
+});
+
+test('it_creates_transaction_successfully_when_account_has_sufficient_balance_with_type_payment_D', function () {
     $account = Account::factory()->create([
         'balance' => 1000,
     ]);
@@ -18,10 +62,14 @@ test('it_creates_transaction_successfully_when_account_has_sufficient_balance', 
         'value' => 100.0,
     ];
 
-    $request = new TransactionCreateRequest();
-    $request->merge($requestData);
+    $transaction = Transaction::prepareTransaction(
+        $account->uuid,
+        $requestData['type'],
+        $requestData['type_payment'],
+        $requestData['value']
+    );
 
-    $createTransaction = new CreateTransaction($account, $request);
+    $createTransaction = new CreateTransaction($account, $transaction);
 
     $fee = Transaction::operationFee(
     Transaction::getFee($requestData['type_payment']),
@@ -32,12 +80,64 @@ test('it_creates_transaction_successfully_when_account_has_sufficient_balance', 
 
     $transaction = $createTransaction->handle();
 
-    expect($transaction->account_uuid)->toBe($requestData['uuid']);
-    expect($transaction->type)->toBe($requestData['type']);
-    expect($transaction->type_payment)->toBe($requestData['type_payment']);
-    expect($fee)->toBe($transaction->fee);
-    expect($total)->toBe($transaction->total);
-    expect($transaction->value)->toBe($requestData['value']);
+    $this->assertDatabaseHas('transactions', [
+        'account_uuid' => $account->uuid,
+        'type' => $requestData['type'],
+        'type_payment' => $requestData['type_payment'],
+        'value' => $requestData['value'],
+        'fee' => $fee,
+        'total' => $total,
+    ]);
+
+    $this->assertDatabaseHas('accounts', [
+        'uuid' => $account->uuid,
+        'balance' => $account->balance - $requestData['value'] - $fee,
+    ]);
+});
+
+test('it_creates_transaction_successfully_when_account_has_sufficient_balance_with_type_payment_C', function () {
+    $account = Account::factory()->create([
+        'balance' => 1000,
+    ]);
+
+    $requestData = [
+        'uuid' => $account->uuid,
+        'type' => 'debit',
+        'type_payment' => 'C',
+        'value' => 100.0,
+    ];
+
+    $transaction = Transaction::prepareTransaction(
+        $account->uuid,
+        $requestData['type'],
+        $requestData['type_payment'],
+        $requestData['value']
+    );
+
+    $createTransaction = new CreateTransaction($account, $transaction);
+
+    $fee = Transaction::operationFee(
+    Transaction::getFee($requestData['type_payment']),
+        $requestData['value']
+    );
+
+    $total = $requestData['value'] + $fee;
+
+    $transaction = $createTransaction->handle();
+
+    $this->assertDatabaseHas('transactions', [
+        'account_uuid' => $account->uuid,
+        'type' => $requestData['type'],
+        'type_payment' => $requestData['type_payment'],
+        'value' => $requestData['value'],
+        'fee' => $fee,
+        'total' => $total,
+    ]);
+
+    $this->assertDatabaseHas('accounts', [
+        'uuid' => $account->uuid,
+        'balance' => $account->balance - $requestData['value'] - $fee,
+    ]);
 });
 
 test('it_throws_insufficient_balance_exception_when_balance_is_insufficient', function () {
@@ -52,10 +152,14 @@ test('it_throws_insufficient_balance_exception_when_balance_is_insufficient', fu
         'value' => 1000.0,
     ];
 
-    $request = new TransactionCreateRequest();
-    $request->merge($requestData);
+    $transaction = Transaction::prepareTransaction(
+        $account->uuid,
+        $requestData['type'],
+        $requestData['type_payment'],
+        $requestData['value']
+    );
 
-    $createTransaction = new CreateTransaction($account, $request);
+    $createTransaction = new CreateTransaction($account, $transaction);
 
     $this->expectException(InsufficientBalance::class);
 
@@ -66,5 +170,10 @@ test('it_throws_insufficient_balance_exception_when_balance_is_insufficient', fu
         'type' => $requestData['type'],
         'type_payment' => $requestData['type_payment'],
         'value' => $requestData['value'],
+    ]);
+
+    $this->assertDatabaseHas('accounts', [
+        'uuid' => $account->uuid,
+        'balance' => $account->balance,
     ]);
 });

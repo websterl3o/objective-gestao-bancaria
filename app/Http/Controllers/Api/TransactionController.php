@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Account;
+use App\Models\Transaction;
 use App\Services\CreateTransaction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\TransactionCreateRequest;
@@ -14,11 +15,18 @@ class TransactionController extends Controller
     {
         $account = Account::where('uuid', $request->uuid)->first();
 
-        if ($account->canAddTransaction($request->value, $request->type_payment)) {
+        $transaction = Transaction::prepareTransaction(
+            $account->uuid,
+            $request->type,
+            $request->type_payment,
+            $request->value
+        );
+
+        if (! $account->canAddTransaction($transaction->total)) {
             return response()->json(['message' => 'Saldo insuficiente.'], 400);
         }
 
-        $createTransaction = new CreateTransaction($account , $request);
+        $createTransaction = new CreateTransaction($account , $transaction);
 
         $transaction = $createTransaction->handle();
 

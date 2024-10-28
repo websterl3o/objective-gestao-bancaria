@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\Log;
 use App\Exceptions\InsufficientBalance;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -39,6 +38,6 @@ class Account extends Model
 
     public function canAddTransaction($value): bool
     {
-        return $this->balance >= $value;
+        return $value <= $this->balance;
     }
 }
