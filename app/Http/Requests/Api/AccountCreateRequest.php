@@ -22,8 +22,8 @@ class AccountCreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'uuid' => 'required|string',
-            'balance' => 'required|numeric',
+            'uuid' => 'required|string|unique:accounts,uuid',
+            'balance' => 'required|numeric|min:0',
         ];
     }
 
@@ -42,8 +42,10 @@ class AccountCreateRequest extends FormRequest
     {
         return [
             'uuid.required' => 'O campo número da conta é obrigatório.',
+            'uuid.unique' => 'O número da conta já está em uso.',
             'balance.required' => 'O campo saldo é obrigatório.',
             'balance.numeric' => 'O campo saldo deve ser um número.',
+            'balance.min' => 'O campo saldo deve ser maior ou igual a 0.',
         ];
     }
 }
